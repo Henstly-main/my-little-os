@@ -1,0 +1,7 @@
+*.o
+*.bin
+*.iso
+iso/
+.vscode/
+compile_commands.json
+.clangd/
