@@ -1,4 +1,4 @@
-OBJECTS = loader.o kmain.o io.o
+OBJECTS = loader.o kmain.o io.o src/drivers/serial.o src/drivers/fb_write.o src/stdio.o
 CC = gcc
 CFLAGS = -m32 -c -ffreestanding -nostdlib \
 				 -fno-builtin -fno-stack-protector \
@@ -24,7 +24,7 @@ os.iso: kernel.elf
 	GRUB_MKRESCUE_SED_STRIP="d" grub-mkrescue -d /usr/lib/grub/i386-pc/ -o os.iso iso
 
 run: os.iso
-	qemu-system-i386 -s -S -cdrom os.iso
+	qemu-system-i386 -s -S -cdrom os.iso -serial file:com1.out
 
 
 %.o: %.c
