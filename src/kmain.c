@@ -1,32 +1,25 @@
+// kmain.c
 #include "io.h"
+#include "drivers/serial.h"
+#include "drivers/fb_write.h"
+#include "stdio.h"
 
-#define FB_GREEN             2
-#define FB_DARK_GREY    8
 
-#define FB_HIGH_BYTE_COMMAND    14
-#define FB_LOW_BYTE_COMMAND      15
 
-#define FB_COMMAND_PORT    0x3D4
-#define FB_DATA_PORT    0x3D5
 
-void fb_write_cell(volatile char* fb,unsigned int i, char c, unsigned char fg, unsigned char bg){
-    fb[i] = c;
-    fb[i+1] = ((bg & 0x0F) << 4) | (fg & 0x0F);
-}
-
-void fb_move_cursor(unsigned short pos){
-    outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
-    outb(FB_DATA_PORT, ((pos >> 8) & 0x00FF));
-    outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
-    outb(FB_DATA_PORT, pos & 0x00FF);
-}
-
-int kmain(int arg1, int arg2){
-    volatile char* fb = (volatile char*)0x000B8000;
-   fb_write_cell(fb,0, 'A', FB_GREEN, FB_DARK_GREY);
-   fb_move_cursor(1);
+int kmain(){
+    fb_configure_color_attribute(FB_WHITE, FB_BLACK);    
+    serial_configure_com1_port(CONF_DIVISOR, CONF_8N1_LINE_PORT, CONF_FIFO_PORT, CONF_MODEM_PORT);
     
-    return arg1+arg2;
+    if(serial_is_thre_fifo_empty(SERIAL_COM1_BASE) == 0x20){
+        fb_print("COM1 READY!!!");
+    }else{
+        fb_print("COM1 NOT READY!!!");
+    }
+
+    serial_data_port_pushl("Hello from kernel!");
+
+    return 0;
 }
 
 
