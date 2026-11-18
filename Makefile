@@ -1,4 +1,4 @@
-OBJECTS = loader.o kmain.o io.o src/drivers/serial.o src/drivers/fb_write.o src/stdio.o
+OBJECTS = loader.o kmain.o io.o src/drivers/serial.o src/drivers/fb_write.o src/stdio.o cpu/lgdt.o cpu/gdt.o
 CC = gcc
 CFLAGS = -m32 -c -ffreestanding -nostdlib \
 				 -fno-builtin -fno-stack-protector \
@@ -28,9 +28,11 @@ run: os.iso
 
 
 %.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS)		$< -o $@
 
 %.o: %.s
+	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS)  $< -o $@
 
 #clean:
