@@ -3,6 +3,8 @@
 #include "drivers/serial.h"
 #include "drivers/fb_write.h"
 #include "stdio.h"
+#include "cpu/gdt.h"
+#include "cpu/lgdt.h"
 
 
 
@@ -17,8 +19,24 @@ int kmain(){
         fb_print("COM1 NOT READY!!!");
     }
 
-    serial_data_port_pushl("Hello from kernel!");
+    serial_data_port_pushl("Hello from kernel!\n");
 
+    _Static_assert(sizeof(DESCRIPTOR)==8,"Invalid size of  descriptor");
+    _Static_assert(sizeof(GDTR)==6, "Invalid size of GDTR register");
+
+
+    GDT[0] = init_descriptor(0x0,0x0,0x0,0x0);
+    
+    GDT[1] = init_descriptor(0x00000000, 0xFFFFF, 0x9A, 0xC);
+    
+    GDT[2] = init_descriptor(0x00000000, 0xFFFFF, 0x92, 0xC);
+    //configure_descriptor(&kernel_code_descriptor, 0x00000000, 0xFFFFF, 0x9A, 0xC);
+    configure_gdtr(&gdtr_reg);
+    serial_data_port_pushl("BEFORE GDT\n");
+    load_gdt(&gdtr_reg);
+    fb_write("GDT LOADED!!!")
+    serial_data_port_pushl("GDT LOADED");
+    //configure_descriptor(&kernel_data_descriptor, 0x00000000, 0xFFFFF, 0x92, 0xC);
     return 0;
 }
 
